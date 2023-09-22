@@ -75,6 +75,7 @@ mapi.init(x,y,z,direction,function ()
 				if not in_valuable_block_table(vbtEntry) then
 					print("Was not already in the table")
 					table.insert(valuable_blocks_table,vbtEntry)
+					print("Current table length: "..table.getn(valuable_blocks_table))
 				end
 			end
 		end
@@ -92,10 +93,14 @@ mapi.init(x,y,z,direction,function ()
 	end
 
 	investigateSurroundings()
-	while valuable_block_table do
-		mapi.goToPosition(vbtEntry[1].x,vbtEntry[1].y,vbtEntry[1].z)
+	while valuable_blocks_table[1] ~= nil do
+		vbtEntry = valuable_blocks_table[1]
+		print("About to go to position "..vbtEntry.x..", "..vbtEntry.y..", "..vbtEntry.z)
+		mapi.ignoreValuables = true
+		mapi.goToPosition(vbtEntry.x,vbtEntry.y,vbtEntry.z)
+		mapi.ignoreValuables = false
 
-		table.remove(vbtEntry,1)
+		table.remove(valuable_blocks_table,1)
 
 		investigateSurroundings()
 	end
@@ -103,7 +108,6 @@ end)
 
 
 
---while true do
---	mapi.goToPosition(math.floor((math.random() - .5) * 2 * config.search_range),config.target_y_level,math.floor((math.random() - .5) * 2 * config.search_range))
---end
-mapi.veinMinerMode()
+while true do
+	mapi.goToPosition(math.floor((math.random() - .5) * 2 * config.search_range) + mapi.position.x,config.target_y_level,math.floor((math.random() - .5) * 2 * config.search_range) + mapi.position.z)
+end

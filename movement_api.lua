@@ -1,6 +1,6 @@
 -- An API for controlling the movement of a turtle while keeping track of its position
 
-
+require "config"
 require "valuable_blocks"
 
 function in_table(t,check)
@@ -21,14 +21,14 @@ mapi.directionNames = {
 	"West"
 }
 
-ignoreValuables = false
+mapi.ignoreValuables = false
 
 -- Move forward specified number of blocks
 mapi.f = function()
 
 	local _, block = turtle.inspect()
 	
-	if (in_table(valuable_blocks,block.name) and not ignoreValuables) then
+	if (in_table(valuable_blocks,block.name) and not mapi.ignoreValuables) then
 		mapi.veinMinerMode()
 	end
 
@@ -153,9 +153,9 @@ end
 
 
 mapi.goHome = function ()
-	ignoreValuables = true
+	mapi.ignoreValuables = true
 	mapi.goToPosition(mapi.home.x,mapi.home.y,mapi.home.z)
-	os.exit()
+	error("Went home")
 end
 
 mapi.goHomeIfNoMoreFuel = function ()
@@ -168,18 +168,23 @@ mapi.goHomeIfNoMoreFuel = function ()
 end
 
 
-mapi.inventoryCheckInterval = 10
+mapi.inventoryCheckInterval = config.inventory_check_interval
 -- Check for and throw out junk items. Also go home if there aren't any slots left
 inventoryCheckIndex = 0
 mapi.inventoryCheck = function ()
 	inventoryCheckIndex = inventoryCheckIndex + 1
 	if inventoryCheckIndex > mapi.inventoryCheckInterval then
 		inventoryCheckIndex = 0
+		filledSlotCount = 0
 		for i=1,16 do
 			turtle.select(i)
+			if (turtle.getItemDetail()) then filledSlotCount = filledSlotCount + 1 end
 			if (turtle.getItemDetail() and (not in_table(valuable_blocks,turtle.getItemDetail().name))) then
 				turtle.drop()
 			end
+		end
+		if filledSlotCount >= 15 then
+			mapi.goHome()
 		end
 	end
 end
